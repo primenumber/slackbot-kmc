@@ -1,0 +1,5 @@
+slack-token: "xoxp-0123456789-0123456789-0123456789-0123456789"
+channels:
+  - id: CABCD0123
+    name: bot-test 
+status-channel: random
