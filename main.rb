@@ -1,5 +1,6 @@
 require 'slack'
 require 'yaml'
+require_relative 'othello'
 
 config = YAML.load_file('config.yml')
 SLACK_TOKEN = config['slack-token']
@@ -119,6 +120,76 @@ def slot_of_slot(channel)
   Slack.chat_postMessage params
 end
 
+def is_base81(str)
+  return false if str.length != 16
+  str.each_byte { |b|
+    return false if b < 33
+    b -= 33
+    a3 = b / 32
+    return false if a3 > 3
+    b %= 32
+    return false if b >= 27
+  }
+  return true
+end
+
+$oth = Othello.new
+
+def othello_post(channel, text)
+  params = {
+    token: SLACK_TOKEN,
+    channel: channel,
+    username: 'othello bot',
+    text: text,
+    icon_emoji: ':riba-si:'
+  }
+  Slack.chat_postMessage params
+end
+
+def othello_think(channel)
+  result = $oth.think
+  othello_post(channel, "#{result.join(' ')}\n```\n#{$oth}\n```")
+end
+
+def othello_invalid_move(channel, hand, e)
+  othello_post(channel, "#{e.message}: #{hand[0...2]}")
+end
+
+def othello(channel, args)
+  p args
+  case args[0]
+  when "play"
+    begin
+      if args[1] == "ps" then
+        raise "invalid pass" if $oth.movable?
+        $oth.pass
+      else
+        x, y = $oth.hand_to_xy(args[1])
+        $oth.move(x, y)
+      end
+      othello_post(channel, "```\n#{$oth}\n```\n#{$oth.to_base81}")
+      othello_think(channel)
+    rescue => e
+      othello_invalid_move(channel, args[1], e)
+      othello_post(channel, "```\n#{$oth}\n```\n#{$oth.to_base81}")
+    end
+  when "newgame"
+    if args[1] == "black" then
+      $oth = Othello.new
+      othello_post(channel, "```\n#{$oth}\n```")
+    elsif args[1] == "white" then
+      $oth = Othello.new
+      othello_post(channel, "```\n#{$oth}\n```")
+      othello_think(channel)
+    else
+      othello_post(channel, "invalid color: #{args[1]}")
+    end
+  when "show"
+    othello_post(channel, "```\n#{$oth}\n```")
+  end
+end
+
+
 client.on :message do |data|
   channel = config['channels'].find {|item| item['id'] == data['channel']}
   next unless channel != nil
@@ -134,6 +205,8 @@ client.on :message do |data|
         fortune(channel_name, args)
       when "help" then
         help(channel_name, args)
+      when "othello" then
+        othello(channel_name, args)
       when "slot" then
         slot_of_slot(channel_name)
       end
