@@ -155,6 +155,10 @@ def othello_invalid_move(channel, hand, e)
   othello_post(channel, "#{e.message}: #{hand[0...2]}")
 end
 
+def othello_board_post(channel)
+  othello_post(channel, "```\n#{$oth}\n```\n#{$oth.to_base81}")
+end
+
 def othello(channel, args)
   p args
   case args[0]
@@ -167,25 +171,25 @@ def othello(channel, args)
         x, y = $oth.hand_to_xy(args[1])
         $oth.move(x, y)
       end
-      othello_post(channel, "```\n#{$oth}\n```\n#{$oth.to_base81}")
+      othello_board_post(channel)
       othello_think(channel)
     rescue => e
       othello_invalid_move(channel, args[1], e)
-      othello_post(channel, "```\n#{$oth}\n```\n#{$oth.to_base81}")
+      othello_board_post(channel)
     end
   when "newgame"
     if args[1] == "black" then
       $oth = Othello.new
-      othello_post(channel, "```\n#{$oth}\n```")
+      othello_board_post(channel)
     elsif args[1] == "white" then
       $oth = Othello.new
-      othello_post(channel, "```\n#{$oth}\n```")
+      othello_board_post(channel)
       othello_think(channel)
     else
       othello_post(channel, "invalid color: #{args[1]}")
     end
   when "show"
-    othello_post(channel, "```\n#{$oth}\n```")
+    othello_board_post(channel)
   end
 end
 
