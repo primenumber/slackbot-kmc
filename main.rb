@@ -1,5 +1,6 @@
 require 'slack'
 require 'yaml'
+require 'openssl'
 require_relative 'othello'
 
 config = YAML.load_file('config.yml')
@@ -120,6 +121,40 @@ def slot_of_slot(channel)
   Slack.chat_postMessage params
 end
 
+def is_prime(channel, args)
+  begin
+    n = OpenSSL::BN.new(args[0])
+    if n.prime? then
+      params = {
+        token: SLACK_TOKEN,
+        channel: channel,
+        username: 'prime judge',
+        text: "#{args[0]} is a prime number.",
+        icon_emoji: ':male-judge:'
+      }
+      Slack.chat_postMessage params
+    else
+      params = {
+        token: SLACK_TOKEN,
+        channel: channel,
+        username: 'prime judge',
+        text: "#{args[0]} is not a prime number.",
+        icon_emoji: ':male-judge:'
+      }
+      Slack.chat_postMessage params
+    end
+  rescue
+    params = {
+      token: SLACK_TOKEN,
+      channel: channel,
+      username: 'prime judge',
+      text: "#{args[0]} is not a number.",
+      icon_emoji: ':male-judge:'
+    }
+    Slack.chat_postMessage params
+  end
+end
+
 def is_base81(str)
   return false if str.length != 16
   str.each_byte { |b|
@@ -213,6 +248,8 @@ client.on :message do |data|
         othello(channel_name, args)
       when "slot" then
         slot_of_slot(channel_name)
+      when "isprime" then
+        is_prime(channel_name, args)
       end
     end
     if line == "スロット" then
