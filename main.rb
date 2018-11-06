@@ -56,14 +56,64 @@ def fortune(channel, args)
 end
 
 def help(channel, args)
-  params = {
-    token: SLACK_TOKEN,
-    channel: channel,
-    username: 'help',
-    text: 'help me',
-    icon_emoji: ':sos:'
-  }
-  Slack.chat_postMessage params
+  if args.empty? then
+    params = {
+      token: SLACK_TOKEN,
+      channel: channel,
+      username: 'help',
+      text: "`$ othello`\n`$ help`\n`$ fortune`\n`$ slot`\n`$ isprime`\n`スロット`",
+      icon_emoji: ':sos:'
+    }
+    Slack.chat_postMessage params
+  else
+    case args[0]
+    when "othello" then
+      params = {
+        token: SLACK_TOKEN,
+        channel: channel,
+        username: 'help',
+        text: "`$ othello play HAND` (ex. `$ othello play d3`, `$ othello play ps`)\n`$ othello newgame TURN` (ex. `$othello newgame black`)\n`$ othello show`",
+        icon_emoji: ':sos:'
+      }
+      Slack.chat_postMessage params
+    when "help" then
+      params = {
+        token: SLACK_TOKEN,
+        channel: channel,
+        username: 'help',
+        text: "`$ help [COMMAND]` (ex. `$ help fortune`)",
+        icon_emoji: ':sos:'
+      }
+      Slack.chat_postMessage params
+    when "fortune" then
+      params = {
+        token: SLACK_TOKEN,
+        channel: channel,
+        username: 'help',
+        text: "`$ fortune`",
+        icon_emoji: ':sos:'
+      }
+      Slack.chat_postMessage params
+    when "slot" then
+      params = {
+        token: SLACK_TOKEN,
+        channel: channel,
+        username: 'help',
+        text: "`$ slot`",
+        icon_emoji: ':sos:'
+      }
+      Slack.chat_postMessage params
+    when "isprime" then
+      params = {
+        token: SLACK_TOKEN,
+        channel: channel,
+        username: 'help',
+        text: "`$ isprime NUMBER` (ex. `$ isprime 57`)",
+        icon_emoji: ':sos:'
+      }
+      Slack.chat_postMessage params
+    end
+  end
 end
 
 def slot_text
