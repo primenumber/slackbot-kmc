@@ -174,6 +174,7 @@ end
 def is_prime(channel, args)
   begin
     n = OpenSSL::BN.new(args[0])
+    raise "Not a number" if n.to_s != args[0]
     if n.prime? then
       params = {
         token: SLACK_TOKEN,
