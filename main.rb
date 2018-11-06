@@ -285,6 +285,9 @@ client.on :message do |data|
   channel_name = channel['name']
   next if data.has_key?('reply_to')
   next unless data.has_key?('text')
+  if data.has_key?('subtype') then
+    next if data['subtype'] == 'bot_message'
+  end
   p data
   data['text'].each_line do |line|
     if line.start_with?("$", "#", "%") then
